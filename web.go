@@ -188,6 +188,18 @@ func (s *Session) Redirect(url string) Result {
 	return Return
 }
 
+//Argument will get argument by key from form or post form
+func (s *Session) Argument(key string) (sval string) {
+	if len(s.R.Form) < 1 && len(s.R.PostForm) < 1 {
+		s.R.ParseForm()
+	}
+	sval = s.R.Form.Get(key)
+	if len(sval) < 1 {
+		sval = s.R.PostFormValue(key)
+	}
+	return
+}
+
 //Get is implement for attrvalid
 func (s *Session) Get(key string) (val interface{}, err error) {
 	if len(s.R.Form) < 1 && len(s.R.PostForm) < 1 {
