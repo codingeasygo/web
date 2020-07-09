@@ -219,6 +219,11 @@ func (s *Session) ValidFormat(format string, args ...interface{}) (err error) {
 	return
 }
 
+//LocalValue will return local value.
+func (s *Session) LocalValue(key string) string {
+	return key
+}
+
 // func http_res(code int, data interface{}, msg string, dmsg string) util.Map {
 // 	res := make(util.Map)
 // 	res["code"] = code
