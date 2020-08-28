@@ -101,15 +101,23 @@ func (m *MemSessionBuilder) FindSession(w http.ResponseWriter, r *http.Request) 
 	}
 	m.locker.Lock()
 	defer m.locker.Unlock()
-	if err != nil {
-		ncookie()
+	var ss Sessionable
+	if w != nil {
+		if err != nil {
+			ncookie()
+		}
+		if _, ok := m.sessions[c.Value]; !ok { //if not found,reset cookie
+			ncookie()
+		}
+		ss = m.sessions[c.Value]
+		ss.Flush()
+	} else {
+		if err == nil {
+			ss, _ = m.sessions[c.Value]
+		}
 	}
-	if _, ok := m.sessions[c.Value]; !ok { //if not found,reset cookie
-		ncookie()
-	}
-	ss := m.sessions[c.Value]
-	ss.Flush()
 	return ss
+
 }
 
 //SetEventHandler will set event handler
