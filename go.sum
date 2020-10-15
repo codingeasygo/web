@@ -6,3 +6,5 @@ github.com/codingeasygo/util v0.0.0-20200709014308-20dc1288e31c h1:WHKJ5efn+yiXG
 github.com/codingeasygo/util v0.0.0-20200709014308-20dc1288e31c/go.mod h1:q4DRF2HY/Qt0qCCARM1OR0dke9XFkKtgr/POyT63crI=
 github.com/codingeasygo/util v0.0.0-20200713041851-864f364bd051 h1:QmVm2XUhpnXbsTY0gPGW7uh60UIe43CPVMJOsngTGYI=
 github.com/codingeasygo/util v0.0.0-20200713041851-864f364bd051/go.mod h1:q4DRF2HY/Qt0qCCARM1OR0dke9XFkKtgr/POyT63crI=
+github.com/codingeasygo/util v0.0.0-20201014080548-bc7145f65bbc h1:LMUmfQmxilsVSk6MQu7S3lAH7MEdZV1Vr+BDD40XhQQ=
+github.com/codingeasygo/util v0.0.0-20201014080548-bc7145f65bbc/go.mod h1:q4DRF2HY/Qt0qCCARM1OR0dke9XFkKtgr/POyT63crI=
