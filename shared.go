@@ -37,8 +37,8 @@ func HandleFunc(pattern string, h HandlerFunc) {
 //Server is shared http server
 var Server *http.Server
 
-//Listner is shared listener
-var Listner net.Listener
+//Listener is shared listener
+var Listener net.Listener
 
 //ListenAndServe will listen the shared server
 func ListenAndServe(addr string) (err error) {
@@ -46,11 +46,11 @@ func ListenAndServe(addr string) (err error) {
 	if strings.HasPrefix(addr, "/") {
 		addrs := strings.SplitN(addr, ",", 2)
 		Server.Addr = addr
-		Listner, err = net.Listen("unix", addrs[0])
+		Listener, err = net.Listen("unix", addrs[0])
 		if err != nil {
 			return
 		}
-		defer Listner.Close()
+		defer Listener.Close()
 		var mod uint64
 		mod, err = strconv.ParseUint(addrs[1], 8, 32)
 		if err != nil {
@@ -59,14 +59,14 @@ func ListenAndServe(addr string) (err error) {
 		os.Chmod(addrs[0], os.FileMode(mod))
 	} else {
 		Server.Addr = addr
-		Listner, err = net.Listen("tcp", addr)
+		Listener, err = net.Listen("tcp", addr)
 		if err != nil {
 			return
 		}
-		Listner = &tcpKeepAliveListener{TCPListener: Listner.(*net.TCPListener)}
-		defer Listner.Close()
+		Listener = &tcpKeepAliveListener{TCPListener: Listener.(*net.TCPListener)}
+		defer Listener.Close()
 	}
-	return Server.Serve(Listner)
+	return Server.Serve(Listener)
 }
 
 type tcpKeepAliveListener struct {
@@ -94,5 +94,5 @@ func HandleSignal() error {
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 	<-sigc
-	return Listner.Close()
+	return Listener.Close()
 }
