@@ -28,6 +28,8 @@ github.com/codingeasygo/util v0.0.0-20210525012319-89d9a81b0355 h1:0DeFA3rjyIRXh
 github.com/codingeasygo/util v0.0.0-20210525012319-89d9a81b0355/go.mod h1:9dg5FLVmPf1T+9CC6Mna6RAyfNjXwUQI5WX27Z+8yIY=
 github.com/codingeasygo/util v0.0.0-20210525075544-fc6ba1fa9b97 h1:19FAk19AG6bk0Z7H5Dq30BQNZVR+hgkJkUO3UdMMRhQ=
 github.com/codingeasygo/util v0.0.0-20210525075544-fc6ba1fa9b97/go.mod h1:9dg5FLVmPf1T+9CC6Mna6RAyfNjXwUQI5WX27Z+8yIY=
+github.com/codingeasygo/util v0.0.0-20210528035134-f4de257c9dbb h1:Hwnz2UaOI7Nks3yEwWRNdxw3w0OVQvH61auiez6NFY0=
+github.com/codingeasygo/util v0.0.0-20210528035134-f4de257c9dbb/go.mod h1:9dg5FLVmPf1T+9CC6Mna6RAyfNjXwUQI5WX27Z+8yIY=
 golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210423082822-04245dca01da/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
