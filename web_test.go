@@ -11,6 +11,10 @@ import (
 	"github.com/codingeasygo/util/xmap"
 )
 
+func init() {
+	xhttp.EnableCookie()
+}
+
 func TestFilterHandler(t *testing.T) {
 	SetLogLevel(LogLevelDebug)
 	mux := NewSessionMux("")

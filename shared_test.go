@@ -14,13 +14,14 @@ func TestShared(t *testing.T) {
 	waiter := sync.WaitGroup{}
 	waiter.Add(2)
 	go func() {
-		ListenAndServe(":12332")
+		fmt.Println(ListenAndServe(":12332"))
 		waiter.Done()
 	}()
 	go func() {
 		HandleSignal()
 		waiter.Done()
 	}()
+	time.Sleep(10 * time.Millisecond)
 	FilterFunc("/f1/h1", func(s *Session) Result {
 		s.SetValue("a", "123")
 		return Continue
