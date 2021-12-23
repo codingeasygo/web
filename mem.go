@@ -87,7 +87,7 @@ func (m *MemSessionBuilder) FindSession(w http.ResponseWriter, r *http.Request) 
 		//
 		session := &MemSession{}
 		session.token = c.Value
-		session.Valuable = xmap.New()
+		session.Valuable = xmap.NewSafe()
 		session.Flush()
 		//
 		// s.ks_lck.Lock()
