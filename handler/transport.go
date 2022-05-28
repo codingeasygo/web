@@ -202,7 +202,7 @@ func (t *TransportForward) Start() (err error) {
 }
 
 func (t *TransportForward) startForward(local, server, key string) {
-	remote := fmt.Sprintf("%v/%v", server, key)
+	remote := fmt.Sprintf(server, key)
 	forward := NewTransportForwardListener(local, remote)
 	web.InfoLog("TransportForwardH start transport forward on %v => %v", forward.Local, forward.Remote)
 	t.forwardLock.Lock()

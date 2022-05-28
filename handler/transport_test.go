@@ -28,7 +28,7 @@ c=xx
 const transportFowradConfig = `
 [transport]
 enabled=1
-server=ws://test:123@127.0.0.1:10000/ss
+server=ws://test:123@127.0.0.1:10000/ss/%v
 a=tcp://127.0.0.1:10030
 b=tcp://127.0.0.1:10040
 `
@@ -152,10 +152,9 @@ func TestTransport(t *testing.T) {
 	}
 
 	{ //forward by env
-
 		forward := NewTransportForward()
 		defer forward.Stop()
-		os.Setenv("ENV_FORWARD_SRV", `ws://test:123@127.0.0.1:10000/ss`)
+		os.Setenv("ENV_FORWARD_SRV", `ws://test:123@127.0.0.1:10000/ss/%v`)
 		os.Setenv("ENV_FORWARD_KEY", `a=tcp://127.0.0.1:10030,b=tcp://127.0.0.1:10040,c`)
 		err = forward.Start()
 		if err != nil {
