@@ -52,9 +52,9 @@ func (t *TransportProxyH) SrvHTTP(w *web.Session) web.Result {
 }
 
 func (t *TransportProxyH) wsHandler(ws *websocket.Conn) {
-	web.InfoLog("TransportServerH start forward %v to %v", ws.Request().RemoteAddr, t.Remote)
+	web.InfoLog("TransportServerH start forward %v=>%v to %v", ws.Request().RemoteAddr, ws.Request().URL.Path, t.Remote)
 	err := t.transporter.Transport(ws, t.Remote)
-	web.InfoLog("TransportServerH forward %v to %v is stopped by %v", ws.Request().RemoteAddr, t.Remote, err)
+	web.InfoLog("TransportServerH forward %v=>%v to %v is stopped by %v", ws.Request().RemoteAddr, ws.Request().URL.Path, t.Remote, err)
 }
 
 func TransportProxy(conf *xprop.Config, mux *web.SessionMux) {
@@ -145,9 +145,9 @@ func (t *TransportForwardListener) proceForward(conn net.Conn) {
 		t.connLock.Unlock()
 		t.waiter.Done()
 	}()
-	web.InfoLog("start transport %v to %v", conn.RemoteAddr(), t.Remote)
+	web.InfoLog("TransportForwardListener start transport %v=>%v to %v", conn.RemoteAddr(), conn.LocalAddr(), t.Remote)
 	xerr := t.transporter.Transport(conn, t.Remote)
-	web.InfoLog("stop transport %v to %v by %v", conn.RemoteAddr(), t.Remote, xerr)
+	web.InfoLog("TransportForwardListener stop transport %v=>%v to %v by %v", conn.RemoteAddr(), conn.LocalAddr(), t.Remote, xerr)
 }
 
 func (t *TransportForwardListener) Close() (err error) {
