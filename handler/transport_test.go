@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -107,15 +108,19 @@ func TestTransport(t *testing.T) {
 		}
 	}
 
-	{ //forward
-		forwardConf := xprop.NewConfig()
-		forwardConf.LoadPropString(transportFowradConfig)
-		forward, err := TransportForward(forwardConf)
+	{ //forward by config
+		forward := NewTransportForward()
+		err := forward.Config.LoadPropString(transportFowradConfig)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 		defer forward.Stop()
+		err = forward.Start()
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		buf := make([]byte, 16)
 		time.Sleep(500 * time.Millisecond)
 
@@ -146,12 +151,54 @@ func TestTransport(t *testing.T) {
 		wsConn.Close()
 	}
 
+	{ //forward by env
+
+		forward := NewTransportForward()
+		defer forward.Stop()
+		os.Setenv("ENV_FORWARD_SRV", `ws://test:123@127.0.0.1:10000/ss`)
+		os.Setenv("ENV_FORWARD_KEY", `a=tcp://127.0.0.1:10030,b=tcp://127.0.0.1:10040,c`)
+		err = forward.Start()
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		buf := make([]byte, 16)
+		time.Sleep(500 * time.Millisecond)
+
+		tcpConn, err := net.Dial("tcp", "127.0.0.1:10030")
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		fmt.Fprintf(tcpConn, "abc")
+		n, err := tcpConn.Read(buf)
+		if err != nil || string(buf[0:n]) != "abc" {
+			t.Error(err)
+			return
+		}
+		tcpConn.Close()
+
+		wsConn, err := net.Dial("tcp", "127.0.0.1:10040")
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		fmt.Fprintf(wsConn, "abc")
+		n, err = wsConn.Read(buf)
+		if err != nil || string(buf[0:n]) != "abc" {
+			t.Error(err)
+			return
+		}
+		wsConn.Close()
+		//
+		os.Clearenv()
+	}
+
 	{ //error
 		conf := xprop.NewConfig()
 		TransportProxy(conf, proxyMux)
-		TransportForward(conf)
-		conf.SetValue("/transport/enabled", "1")
-		TransportForward(conf)
+
+		NewTransportForward().Start()
 
 		NewTransportForwardListener("", "xxx://").Serve()
 		NewTransportForwardListener("tcp://xx:xx", "ws://localhost").Serve()

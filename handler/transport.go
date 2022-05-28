@@ -158,14 +158,16 @@ func (t *TransportForwardListener) Close() (err error) {
 	return
 }
 
-type TransportForwardH struct {
+type TransportForward struct {
+	Config      *xprop.Config
 	waiter      sync.WaitGroup
 	forwardAll  map[string]*TransportForwardListener
 	forwardLock sync.RWMutex
 }
 
-func NewTransportForwardH() (forward *TransportForwardH) {
-	forward = &TransportForwardH{
+func NewTransportForward() (forward *TransportForward) {
+	forward = &TransportForward{
+		Config:      xprop.NewConfig(),
 		waiter:      sync.WaitGroup{},
 		forwardAll:  map[string]*TransportForwardListener{},
 		forwardLock: sync.RWMutex{},
@@ -173,33 +175,44 @@ func NewTransportForwardH() (forward *TransportForwardH) {
 	return
 }
 
-func (t *TransportForwardH) Start(conf *xprop.Config) (err error) {
-	enabled := conf.StrDef("0", "/transport/enabled")
-	if enabled != "1" {
-		return
-	}
-	server := conf.StrDef("", "/transport/server")
+func (t *TransportForward) Start() (err error) {
+	server := t.Config.EnvReplaceEmpty(`${transport/server,ENV_FORWARD_SRV}`, true)
 	if len(server) < 1 {
-		err = fmt.Errorf("/transport/server is required")
+		err = fmt.Errorf("transport/server or ENV_FORWARD_SRV is required")
 		return
 	}
-	conf.Range("transport", func(key string, val interface{}) {
+	t.Config.Range("transport", func(key string, val interface{}) {
 		if key == "enabled" || key == "server" {
 			return
 		}
-		remote := fmt.Sprintf("%v/%v", server, key)
-		forward := NewTransportForwardListener(val.(string), remote)
-		web.InfoLog("TransportForwardH start transport forward on %v => %v", forward.Local, forward.Remote)
-		t.forwardLock.Lock()
-		t.forwardAll[fmt.Sprintf("%p", forward)] = forward
-		t.forwardLock.Unlock()
-		t.waiter.Add(1)
-		go t.proceForward(forward)
+		t.startForward(val.(string), server, key)
 	})
+	keys := t.Config.EnvReplaceEmpty(`${ENV_FORWARD_KEY}`, true)
+	if len(keys) > 0 {
+		for _, key := range strings.Split(keys, ",") {
+			parts := strings.SplitN(key, "=", 2)
+			if len(parts) < 2 {
+				web.WarnLog("TransportForwardH parse key %v is fail", key)
+				continue
+			}
+			t.startForward(strings.TrimSpace(parts[1]), server, strings.TrimSpace(parts[0]))
+		}
+	}
 	return
 }
 
-func (t *TransportForwardH) proceForward(forward *TransportForwardListener) {
+func (t *TransportForward) startForward(local, server, key string) {
+	remote := fmt.Sprintf("%v/%v", server, key)
+	forward := NewTransportForwardListener(local, remote)
+	web.InfoLog("TransportForwardH start transport forward on %v => %v", forward.Local, forward.Remote)
+	t.forwardLock.Lock()
+	t.forwardAll[fmt.Sprintf("%p", forward)] = forward
+	t.forwardLock.Unlock()
+	t.waiter.Add(1)
+	go t.proceForward(forward)
+}
+
+func (t *TransportForward) proceForward(forward *TransportForwardListener) {
 	defer func() {
 		t.forwardLock.Lock()
 		delete(t.forwardAll, fmt.Sprintf("%p", forward))
@@ -209,18 +222,12 @@ func (t *TransportForwardH) proceForward(forward *TransportForwardListener) {
 	forward.Serve()
 }
 
-func (t *TransportForwardH) Stop() (err error) {
+func (t *TransportForward) Stop() (err error) {
 	t.forwardLock.Lock()
 	for _, forward := range t.forwardAll {
 		forward.Close()
 	}
 	t.forwardLock.Unlock()
 	t.waiter.Wait()
-	return
-}
-
-func TransportForward(conf *xprop.Config) (forward *TransportForwardH, err error) {
-	forward = NewTransportForwardH()
-	err = forward.Start(conf)
 	return
 }

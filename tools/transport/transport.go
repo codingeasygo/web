@@ -3,21 +3,19 @@ package main
 import (
 	"os"
 
-	"github.com/codingeasygo/util/xprop"
 	"github.com/codingeasygo/web/handler"
 )
 
 func main() {
-	confFile := "transport.properties"
+	var err error
+	forward := handler.NewTransportForward()
 	if len(os.Args) > 1 {
-		confFile = os.Args[1]
+		err = forward.Config.LoadFileWait(os.Args[1], false)
+		if err != nil {
+			panic(err)
+		}
 	}
-	config := xprop.NewConfig()
-	err := config.LoadFileWait(confFile, false)
-	if err != nil {
-		panic(err)
-	}
-	forward, err := handler.TransportForward(config)
+	err = forward.Start()
 	if err != nil {
 		panic(err)
 	}
