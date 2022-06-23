@@ -113,7 +113,7 @@ func (m *MemSessionBuilder) FindSession(w http.ResponseWriter, r *http.Request) 
 		ss.Flush()
 	} else {
 		if err == nil {
-			ss, _ = m.sessions[c.Value]
+			ss = m.sessions[c.Value]
 		}
 	}
 	return ss

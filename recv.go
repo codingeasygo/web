@@ -169,9 +169,10 @@ type fsSizable interface {
 type fsStatable interface {
 	Stat() (os.FileInfo, error)
 }
-type fsNamable interface {
-	Name() string
-}
+
+// type fsNamable interface {
+// 	Name() string
+// }
 
 func formFileSzie(src interface{}) int64 {
 	var fsize int64 = 0

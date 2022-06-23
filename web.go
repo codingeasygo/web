@@ -599,7 +599,7 @@ func (s *SessionMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.locker.Lock()
 		delete(s.sessions, r) //remove the http session object.
 		s.locker.Unlock()
-		used := time.Now().Sub(beg)
+		used := time.Since(beg)
 		if s.ShowSlow > 0 && used > s.ShowSlow {
 			WarnLog("SessionMux slow request found->%v", r.URL.String())
 		}
