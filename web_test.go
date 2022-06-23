@@ -170,7 +170,7 @@ func TestFilterHandler(t *testing.T) {
 			s.R.Form = nil
 			return Continue
 		})
-		mux.HandleFunc("/post/", func(s *Session) Result {
+		mux.HandleFunc("/post/a", func(s *Session) Result {
 			var a string
 			err := s.ValidFormat(`a,r|s,l:0`, &a)
 			if err != nil {
@@ -178,7 +178,38 @@ func TestFilterHandler(t *testing.T) {
 			}
 			return s.Printf("%v", a)
 		})
-		text, err = xhttp.PostFormText(xmap.M{"a": "123"}, "%v/post/", ts.URL)
+		mux.HandleFunc("/post/b", func(s *Session) Result {
+			var args struct {
+				A string `json:"a" valid:"a,r|s,l:0;"`
+			}
+			err := s.Valid(&args, "#all")
+			if err != nil {
+				return s.Printf("%v", err.Error())
+			}
+			return s.Printf("%v", args.A)
+		})
+		mux.HandleFunc("/post/c", func(s *Session) Result {
+			var args struct {
+				A string `json:"a" valid:"a,r|s,l:0;"`
+			}
+			var b string
+			err := s.Valid(&args, "#all", `b,r|s,l:0`, &b)
+			if err != nil {
+				return s.Printf("%v", err.Error())
+			}
+			return s.Printf("%v", args.A+b)
+		})
+		text, err = xhttp.PostFormText(xmap.M{"a": "123"}, "%v/post/a", ts.URL)
+		if err != nil || text != "123" {
+			t.Errorf("err:%v,text:%v", err, text)
+			return
+		}
+		text, err = xhttp.PostFormText(xmap.M{"a": "123"}, "%v/post/b", ts.URL)
+		if err != nil || text != "123" {
+			t.Errorf("err:%v,text:%v", err, text)
+			return
+		}
+		text, err = xhttp.PostFormText(xmap.M{"a": "12", "b": "3"}, "%v/post/c", ts.URL)
 		if err != nil || text != "123" {
 			t.Errorf("err:%v,text:%v", err, text)
 			return

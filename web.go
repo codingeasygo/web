@@ -4,11 +4,13 @@ import (
 	"compress/gzip"
 	"fmt"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/codingeasygo/util/attrscan"
 	"github.com/codingeasygo/util/attrvalid"
 	"github.com/codingeasygo/util/monitor"
 	"github.com/codingeasygo/util/xmap"
@@ -216,6 +218,22 @@ func (s *Session) Get(key string) (val interface{}, err error) {
 //ValidFormat is implement for attrvalid
 func (s *Session) ValidFormat(format string, args ...interface{}) (err error) {
 	err = attrvalid.ValidAttrFormat(format, s, true, args...)
+	return
+}
+
+var Valider = attrvalid.Valider{
+	Scanner: attrscan.Scanner{
+		Tag: "json",
+		NameConv: func(on, name string, field reflect.StructField) string {
+			return name
+		},
+	},
+}
+
+//Valid is implement for valid object and argument
+func (s *Session) Valid(target interface{}, filter string, args ...interface{}) (err error) {
+	format, args := Valider.ValidArgs(target, filter, args...)
+	err = s.ValidFormat(format, args...)
 	return
 }
 
