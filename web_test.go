@@ -1,18 +1,26 @@
 package web
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/codingeasygo/util/converter"
 	"github.com/codingeasygo/util/xhttp"
 	"github.com/codingeasygo/util/xmap"
 )
 
 func init() {
 	xhttp.EnableCookie()
+}
+
+type AbcXML struct {
+	XMLName xml.Name `xml:"abc"`
+	A       string   `xml:"a" valid:"a,r|s,l:0;"`
 }
 
 func TestFilterHandler(t *testing.T) {
@@ -199,6 +207,24 @@ func TestFilterHandler(t *testing.T) {
 			}
 			return s.Printf("%v", args.A+b)
 		})
+		mux.HandleFunc("/post/d", func(s *Session) Result {
+			var args struct {
+				A string `json:"a" valid:"a,r|s,l:0;"`
+			}
+			_, err := s.RecvValidJSON(&args, "#all")
+			if err != nil {
+				return s.Printf("%v", err.Error())
+			}
+			return s.Printf("%v", args.A)
+		})
+		mux.HandleFunc("/post/e", func(s *Session) Result {
+			var args AbcXML
+			_, err := s.RecvValideXML(&args, "#all")
+			if err != nil {
+				return s.Printf("%v", err.Error())
+			}
+			return s.Printf("%v", args.A)
+		})
 		text, err = xhttp.PostFormText(xmap.M{"a": "123"}, "%v/post/a", ts.URL)
 		if err != nil || text != "123" {
 			t.Errorf("err:%v,text:%v", err, text)
@@ -210,6 +236,17 @@ func TestFilterHandler(t *testing.T) {
 			return
 		}
 		text, err = xhttp.PostFormText(xmap.M{"a": "12", "b": "3"}, "%v/post/c", ts.URL)
+		if err != nil || text != "123" {
+			t.Errorf("err:%v,text:%v", err, text)
+			return
+		}
+		text, _, err = xhttp.PostHeaderText(nil, bytes.NewBufferString(converter.JSON(xmap.M{"a": "123"})), "%v/post/d", ts.URL)
+		if err != nil || text != "123" {
+			t.Errorf("err:%v,text:%v", err, text)
+			return
+		}
+		fmt.Println(converter.XML(AbcXML{A: "123"}))
+		text, _, err = xhttp.PostHeaderText(nil, bytes.NewBufferString(converter.XML(AbcXML{A: "123"})), "%v/post/e", ts.URL)
 		if err != nil || text != "123" {
 			t.Errorf("err:%v,text:%v", err, text)
 			return
