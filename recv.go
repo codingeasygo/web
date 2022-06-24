@@ -163,19 +163,19 @@ func (s *Session) RecvXML(v interface{}) (data []byte, err error) {
 }
 
 //RecvValidJSON will receive body, then parse to json object and valid object
-func (s *Session) RecvValidJSON(v interface{}, filter string) (data []byte, err error) {
+func (s *Session) RecvValidJSON(v interface{}, filter, optional string) (data []byte, err error) {
 	data, err = converter.UnmarshalJSON(s.R.Body, v)
 	if err == nil {
-		err = Valider.Valid(v, filter)
+		err = Valider.Valid(v, filter, optional)
 	}
 	return
 }
 
 //RecvValideXML will receive body, then parse to xml object and valid object
-func (s *Session) RecvValideXML(v interface{}, filter string) (data []byte, err error) {
+func (s *Session) RecvValideXML(v interface{}, filter, optional string) (data []byte, err error) {
 	data, err = converter.UnmarshalXML(s.R.Body, v)
 	if err == nil {
-		err = Valider.Valid(v, filter)
+		err = Valider.Valid(v, filter, optional)
 	}
 	return
 }

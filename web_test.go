@@ -211,7 +211,7 @@ func TestFilterHandler(t *testing.T) {
 			var args struct {
 				A string `json:"a" valid:"a,r|s,l:0;"`
 			}
-			_, err := s.RecvValidJSON(&args, "#all")
+			_, err := s.RecvValidJSON(&args, "#all", "")
 			if err != nil {
 				return s.Printf("%v", err.Error())
 			}
@@ -219,7 +219,7 @@ func TestFilterHandler(t *testing.T) {
 		})
 		mux.HandleFunc("/post/e", func(s *Session) Result {
 			var args AbcXML
-			_, err := s.RecvValideXML(&args, "#all")
+			_, err := s.RecvValideXML(&args, "#all", "")
 			if err != nil {
 				return s.Printf("%v", err.Error())
 			}
