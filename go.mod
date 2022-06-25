@@ -3,6 +3,6 @@ module github.com/codingeasygo/web
 go 1.0
 
 require (
-	github.com/codingeasygo/util v0.0.0-20220625112226-209ccfe4499f
+	github.com/codingeasygo/util v0.0.0-20220625115529-96781f194f22
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 )
