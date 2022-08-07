@@ -37,7 +37,7 @@ func TestServer(t *testing.T) {
 	var err error
 	var text string
 	ts := NewHandlerFuncServer(testHandlerFunc)
-	ts.StartTLS()
+	// ts.StartTLS()
 	defer ts.Close()
 	text, _, err = ts.GetHeaderText(xmap.M{"xx": 1}, "?a=%v", "testing")
 	if err != nil || text != "testing" {

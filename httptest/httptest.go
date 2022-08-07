@@ -3,14 +3,156 @@ package httptest
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"reflect"
+	"testing"
 	"time"
 
+	"github.com/codingeasygo/util/converter"
 	"github.com/codingeasygo/util/xhttp"
 	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
 )
+
+var Log = log.New(os.Stderr, "    ", log.Llongfile)
+
+type Client struct {
+	Client    *xhttp.Client
+	shouldErr *testing.T
+	shouldKey string
+	shouldVal interface{}
+}
+
+func (c *Client) callError(err error) {
+	if c.shouldErr == nil {
+		panic(err)
+	} else {
+		Log.Output(5, err.Error())
+		c.shouldErr.Fail()
+	}
+}
+
+func (c *Client) validError(res xmap.M, err error) bool {
+	if err != nil {
+		c.callError(err)
+		return false
+	}
+	return true
+}
+
+func (c *Client) validShould(res xmap.M, err error) bool {
+	if len(c.shouldKey) < 1 {
+		return true
+	}
+	val := res.Value(c.shouldKey)
+	if c.shouldVal == nil || val == nil {
+		if c.shouldVal == nil && val == nil {
+			return true
+		}
+		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
+		return false
+	}
+	resultValue := reflect.ValueOf(val)
+	if !resultValue.CanConvert(reflect.TypeOf(c.shouldVal)) {
+		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
+		return false
+	}
+	targetValue := resultValue.Convert(reflect.TypeOf(c.shouldVal))
+	if !reflect.DeepEqual(targetValue, c.shouldVal) {
+		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
+		return false
+	}
+	return true
+}
+
+func (c *Client) validResult(res xmap.M, err error) bool {
+	if !c.validError(res, err) {
+		return false
+	}
+	if !c.validShould(res, err) {
+		return false
+	}
+	return true
+}
+
+//GetMap will get map from remote
+func (c *Client) Should(t *testing.T, key string, value interface{}) *Client {
+	c.shouldErr, c.shouldKey, c.shouldVal = t, key, value
+	return c
+}
+
+//GetMap will get map from remote
+func (c *Client) GetMap(format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.GetMap(format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//GetHeaderMap will get map from remote
+func (c *Client) GetHeaderMap(header xmap.M, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
+	data, res, err = c.Client.GetHeaderMap(header, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostMap will get map from remote
+func (c *Client) PostMap(body io.Reader, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.PostMap(body, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostTypeMap will get map from remote
+func (c *Client) PostTypeMap(contentType string, body io.Reader, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.PostTypeMap(contentType, body, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostHeaderMap will get map from remote
+func (c *Client) PostHeaderMap(header xmap.M, body io.Reader, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
+	data, res, err = c.Client.PostHeaderMap(header, body, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostJSONMap will get map from remote
+func (c *Client) PostJSONMap(body interface{}, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.PostJSONMap(body, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//MethodBytes will do http request, read reponse and parse to map
+func (c *Client) MethodMap(method string, header xmap.M, body io.Reader, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
+	data, res, err = c.Client.MethodMap(method, header, body, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostFormMap will get map from remote
+func (c *Client) PostFormMap(form xmap.M, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.PostFormMap(form, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//PostMultipartMap will get map from remote
+func (c *Client) PostMultipartMap(header, fields xmap.M, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.PostMultipartMap(header, fields, format, args...)
+	c.validResult(data, err)
+	return
+}
+
+//UploadMap will get map from remote
+func (c *Client) UploadMap(fields xmap.M, filekey, filename, format string, args ...interface{}) (data xmap.M, err error) {
+	data, err = c.Client.UploadMap(fields, filekey, filename, format, args...)
+	c.validResult(data, err)
+	return
+}
 
 //Server is httptest server
 type Server struct {
@@ -73,4 +215,11 @@ func (s *Server) rawRequest(method, uri string, header xmap.M, body io.Reader) (
 		res, err = xhttp.DefaultClient.Do(req)
 	}
 	return
+}
+
+func (s *Server) Should(t *testing.T, key string, value interface{}) *Client {
+	c := &Client{
+		Client: &xhttp.Client{Raw: s.rawRequest},
+	}
+	return c.Should(t, key, value)
 }
