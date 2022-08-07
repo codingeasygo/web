@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codingeasygo/util/converter"
 	"github.com/codingeasygo/util/xhttp"
 	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
@@ -34,7 +35,7 @@ func (c *Client) callError(err error) {
 
 func (c *Client) validError(res xmap.M, err error) bool {
 	if err != nil {
-		c.callError(err)
+		c.callError(fmt.Errorf("%v, res is %v", err, converter.JSON(res)))
 		return false
 	}
 	return true
@@ -46,7 +47,7 @@ func (c *Client) validShould(res xmap.M, err error) bool {
 	}
 	xerr := res.Should(c.shouldArgs...)
 	if xerr != nil {
-		c.callError(xerr)
+		c.callError(fmt.Errorf("%v, res is %v", xerr, converter.JSON(res)))
 		return false
 	}
 	return true
