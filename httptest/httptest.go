@@ -7,11 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/converter"
 	"github.com/codingeasygo/util/xhttp"
 	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
@@ -20,10 +18,9 @@ import (
 var Log = log.New(os.Stderr, "    ", log.Llongfile)
 
 type Client struct {
-	Client    *xhttp.Client
-	shouldErr *testing.T
-	shouldKey string
-	shouldVal interface{}
+	Client     *xhttp.Client
+	shouldErr  *testing.T
+	shouldArgs []interface{}
 }
 
 func (c *Client) callError(err error) {
@@ -44,25 +41,12 @@ func (c *Client) validError(res xmap.M, err error) bool {
 }
 
 func (c *Client) validShould(res xmap.M, err error) bool {
-	if len(c.shouldKey) < 1 {
+	if len(c.shouldArgs) < 1 {
 		return true
 	}
-	val := res.Value(c.shouldKey)
-	if c.shouldVal == nil || val == nil {
-		if c.shouldVal == nil && val == nil {
-			return true
-		}
-		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
-		return false
-	}
-	resultValue := reflect.ValueOf(val)
-	if !resultValue.CanConvert(reflect.TypeOf(c.shouldVal)) {
-		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
-		return false
-	}
-	targetValue := resultValue.Convert(reflect.TypeOf(c.shouldVal))
-	if !reflect.DeepEqual(targetValue, c.shouldVal) {
-		c.callError(fmt.Errorf("res.%v(%v)!=%v, result is %v", c.shouldKey, val, c.shouldVal, converter.JSON(res)))
+	xerr := res.Should(c.shouldArgs...)
+	if xerr != nil {
+		c.callError(err)
 		return false
 	}
 	return true
@@ -79,8 +63,8 @@ func (c *Client) validResult(res xmap.M, err error) bool {
 }
 
 //GetMap will get map from remote
-func (c *Client) Should(t *testing.T, key string, value interface{}) *Client {
-	c.shouldErr, c.shouldKey, c.shouldVal = t, key, value
+func (c *Client) Should(t *testing.T, args ...interface{}) *Client {
+	c.shouldErr, c.shouldArgs = t, args
 	return c
 }
 
@@ -217,9 +201,9 @@ func (s *Server) rawRequest(method, uri string, header xmap.M, body io.Reader) (
 	return
 }
 
-func (s *Server) Should(t *testing.T, key string, value interface{}) *Client {
+func (s *Server) Should(t *testing.T, args ...interface{}) *Client {
 	c := &Client{
 		Client: &xhttp.Client{Raw: s.rawRequest},
 	}
-	return c.Should(t, key, value)
+	return c.Should(t, args...)
 }
