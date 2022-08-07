@@ -46,7 +46,7 @@ func (c *Client) validShould(res xmap.M, err error) bool {
 	}
 	xerr := res.Should(c.shouldArgs...)
 	if xerr != nil {
-		c.callError(err)
+		c.callError(xerr)
 		return false
 	}
 	return true
