@@ -30,6 +30,7 @@ func (c *Client) callError(err error) {
 	} else {
 		Log.Output(5, err.Error())
 		c.shouldErr.Fail()
+		c.shouldErr.SkipNow()
 	}
 }
 
