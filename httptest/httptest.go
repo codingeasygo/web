@@ -20,17 +20,18 @@ var Log = log.New(os.Stderr, "    ", log.Llongfile)
 
 type Client struct {
 	Client     *xhttp.Client
-	shouldErr  *testing.T
+	shouldT    *testing.T
+	shouldErr  bool
 	shouldArgs []interface{}
 }
 
 func (c *Client) callError(err error) {
-	if c.shouldErr == nil {
+	if c.shouldT == nil {
 		panic(err)
 	} else {
 		Log.Output(5, err.Error())
-		c.shouldErr.Fail()
-		c.shouldErr.SkipNow()
+		c.shouldT.Fail()
+		c.shouldT.SkipNow()
 	}
 }
 
@@ -55,18 +56,31 @@ func (c *Client) validShould(res xmap.M, err error) bool {
 }
 
 func (c *Client) validResult(res xmap.M, err error) bool {
-	if !c.validError(res, err) {
-		return false
-	}
-	if !c.validShould(res, err) {
-		return false
+	if c.shouldErr {
+		if err == nil {
+			c.callError(fmt.Errorf("err is nil, res is %v", converter.JSON(res)))
+			return false
+		}
+	} else {
+		if !c.validError(res, err) {
+			return false
+		}
+		if !c.validShould(res, err) {
+			return false
+		}
 	}
 	return true
 }
 
-//GetMap will get map from remote
+//Should will assert by xmap.M.Should
 func (c *Client) Should(t *testing.T, args ...interface{}) *Client {
-	c.shouldErr, c.shouldArgs = t, args
+	c.shouldT, c.shouldArgs = t, args
+	return c
+}
+
+//Should will assert by xmap.M.Should
+func (c *Client) ShouldError(t *testing.T) *Client {
+	c.shouldT, c.shouldErr = t, true
 	return c
 }
 
@@ -208,4 +222,11 @@ func (s *Server) Should(t *testing.T, args ...interface{}) *Client {
 		Client: &xhttp.Client{Raw: s.rawRequest},
 	}
 	return c.Should(t, args...)
+}
+
+func (s *Server) ShouldError(t *testing.T) *Client {
+	c := &Client{
+		Client: &xhttp.Client{Raw: s.rawRequest},
+	}
+	return c.ShouldError(t)
 }
