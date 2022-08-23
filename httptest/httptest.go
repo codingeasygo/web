@@ -3,154 +3,106 @@ package httptest
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/converter"
 	"github.com/codingeasygo/util/xhttp"
 	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
 )
 
-var Log = log.New(os.Stderr, "    ", log.Llongfile)
-
 type Client struct {
-	Client     *xhttp.Client
-	shouldT    *testing.T
-	shouldErr  bool
-	shouldArgs []interface{}
-}
-
-func (c *Client) callError(err error) {
-	if c.shouldT == nil {
-		panic(err)
-	} else {
-		Log.Output(5, err.Error())
-		c.shouldT.Fail()
-		c.shouldT.SkipNow()
-	}
-}
-
-func (c *Client) validError(res xmap.M, err error) bool {
-	if err != nil {
-		c.callError(fmt.Errorf("%v, res is %v", err, converter.JSON(res)))
-		return false
-	}
-	return true
-}
-
-func (c *Client) validShould(res xmap.M, err error) bool {
-	if len(c.shouldArgs) < 1 {
-		return true
-	}
-	xerr := res.Should(c.shouldArgs...)
-	if xerr != nil {
-		c.callError(fmt.Errorf("%v, res is %v", xerr, converter.JSON(res)))
-		return false
-	}
-	return true
-}
-
-func (c *Client) validResult(res xmap.M, err error) bool {
-	if c.shouldErr {
-		if err == nil {
-			c.callError(fmt.Errorf("err is nil, res is %v", converter.JSON(res)))
-			return false
-		}
-	} else {
-		if !c.validError(res, err) {
-			return false
-		}
-		if !c.validShould(res, err) {
-			return false
-		}
-	}
-	return true
+	Shoulder xmap.Shoulder
+	Client   *xhttp.Client
 }
 
 //Should will assert by xmap.M.Should
 func (c *Client) Should(t *testing.T, args ...interface{}) *Client {
-	c.shouldT, c.shouldArgs = t, args
+	c.Shoulder.Should(t, args...)
 	return c
 }
 
-//Should will assert by xmap.M.Should
+//ShouldError will assert err is not nil
 func (c *Client) ShouldError(t *testing.T) *Client {
-	c.shouldT, c.shouldErr = t, true
+	c.Shoulder.ShouldError(t)
+	return c
+}
+
+//OnlyLog will only show error log
+func (c *Client) OnlyLog(only bool) *Client {
+	c.Shoulder.OnlyLog(only)
 	return c
 }
 
 //GetMap will get map from remote
 func (c *Client) GetMap(format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.GetMap(format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //GetHeaderMap will get map from remote
 func (c *Client) GetHeaderMap(header xmap.M, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
 	data, res, err = c.Client.GetHeaderMap(header, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostMap will get map from remote
 func (c *Client) PostMap(body io.Reader, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.PostMap(body, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostTypeMap will get map from remote
 func (c *Client) PostTypeMap(contentType string, body io.Reader, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.PostTypeMap(contentType, body, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostHeaderMap will get map from remote
 func (c *Client) PostHeaderMap(header xmap.M, body io.Reader, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
 	data, res, err = c.Client.PostHeaderMap(header, body, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostJSONMap will get map from remote
 func (c *Client) PostJSONMap(body interface{}, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.PostJSONMap(body, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //MethodBytes will do http request, read reponse and parse to map
 func (c *Client) MethodMap(method string, header xmap.M, body io.Reader, format string, args ...interface{}) (data xmap.M, res *http.Response, err error) {
 	data, res, err = c.Client.MethodMap(method, header, body, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostFormMap will get map from remote
 func (c *Client) PostFormMap(form xmap.M, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.PostFormMap(form, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //PostMultipartMap will get map from remote
 func (c *Client) PostMultipartMap(header, fields xmap.M, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.PostMultipartMap(header, fields, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 
 //UploadMap will get map from remote
 func (c *Client) UploadMap(fields xmap.M, filekey, filename, format string, args ...interface{}) (data xmap.M, err error) {
 	data, err = c.Client.UploadMap(fields, filekey, filename, format, args...)
-	c.validResult(data, err)
+	c.Shoulder.Valid(3, data, err)
 	return
 }
 

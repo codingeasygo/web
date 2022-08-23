@@ -1,4 +1,4 @@
-github.com/codingeasygo/util v0.0.0-20220823034052-258bf0fdb58d h1:hkroBHEgmH3Kr7bI2HlYM6IzSlA/mUuXJDg6dlDpJUo=
-github.com/codingeasygo/util v0.0.0-20220823034052-258bf0fdb58d/go.mod h1:CE705pc3Xn2F3nqMKhvfaigeXeDudpdteTzbf+2jwig=
+github.com/codingeasygo/util v0.0.0-20220823140802-c3d6b044d914 h1:iR5neXPmPzth8QMWC9F4uZvc9a1bmY8Bx38CZY3155I=
+github.com/codingeasygo/util v0.0.0-20220823140802-c3d6b044d914/go.mod h1:CE705pc3Xn2F3nqMKhvfaigeXeDudpdteTzbf+2jwig=
 golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 h1:a8jGStKg0XqKDlKqjLrXn0ioF5MH36pT7Z0BRTqLhbk=
 golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=

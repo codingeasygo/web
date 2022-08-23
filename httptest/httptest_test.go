@@ -41,4 +41,5 @@ func TestShould(t *testing.T) {
 	ts.Should(t, "code", 0).PostMultipartMap(nil, nil, "/ok")
 	ts.Should(t, "code", 0).UploadMap(nil, "file", "httptest.go", "/ok")
 	ts.ShouldError(t).GetMap("/none")
+	ts.Should(t).OnlyLog(true).GetMap("/none")
 }
