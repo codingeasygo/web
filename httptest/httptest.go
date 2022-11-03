@@ -78,12 +78,12 @@ func (s *Server) rawRequest(method, uri string, header xmap.M, body io.Reader) (
 
 func (s *Server) Should(t *testing.T, args ...interface{}) *xhttp.ShouldClient {
 	c := xhttp.NewShouldClient()
-	c.Client = &xhttp.Client{Raw: s.rawRequest}
+	c.Client = s.Client
 	return c.Should(t, args...)
 }
 
 func (s *Server) ShouldError(t *testing.T) *xhttp.ShouldClient {
 	c := xhttp.NewShouldClient()
-	c.Client = &xhttp.Client{Raw: s.rawRequest}
+	c.Client = s.Client
 	return c.ShouldError(t)
 }
