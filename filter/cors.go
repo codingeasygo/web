@@ -30,7 +30,9 @@ func (c *CORS) exec(w http.ResponseWriter, r *http.Request) web.Result {
 		return web.Continue
 	}
 	if len(origin) > 0 {
-		if v, ok := c.Sites["*"]; ok && v > 0 {
+		if v, ok := c.Sites["@"]; ok && v > 0 {
+			return found(origin)
+		} else if v, ok := c.Sites["*"]; ok && v > 0 {
 			return found("*")
 		} else if v, ok := c.Sites[origin]; ok && v > 0 {
 			return found(origin)
@@ -42,6 +44,7 @@ func (c *CORS) exec(w http.ResponseWriter, r *http.Request) web.Result {
 		return web.Continue
 	}
 }
+
 func (c *CORS) SrvHTTP(s *web.Session) web.Result {
 	return c.exec(s.W, s.R)
 }
@@ -69,13 +72,17 @@ func NewSiteCORS(site string) *CORS {
 
 func NewSiteGetPostCORS(site string) *CORS {
 	cors := NewSiteCORS(site)
-	cors.Methods = []string{"GET", "POST"}
+	cors.Methods = []string{"GET", "POST", "OPTIONS"}
 	cors.Headers = []string{"Origin", "X-Requested-With", "Content-Type", "Accept"}
 	return cors
 }
 
 func NewAllCORS() *CORS {
 	return NewSiteGetPostCORS("*")
+}
+
+func NewOriginCORS() *CORS {
+	return NewSiteGetPostCORS("@")
 }
 
 // type P3P struct {
