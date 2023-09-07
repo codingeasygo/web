@@ -9,25 +9,25 @@ import (
 	"github.com/codingeasygo/util/xmap"
 )
 
-//MemSession is memory session implement
+// MemSession is memory session implement
 type MemSession struct {
 	xmap.Valuable
 	token  string
 	latest time.Time
 }
 
-//ID return the session id
+// ID return the session id
 func (m *MemSession) ID() string {
 	return m.token
 }
 
-//Flush will flush session latest time
+// Flush will flush session latest time
 func (m *MemSession) Flush() error {
 	m.latest = time.Now()
 	return nil
 }
 
-//MemSessionBuilder is memory session builder implement
+// MemSessionBuilder is memory session builder implement
 type MemSessionBuilder struct {
 	xmap.Valuable
 	Domain    string
@@ -43,7 +43,7 @@ type MemSessionBuilder struct {
 	locker   sync.RWMutex
 }
 
-//NewMemSessionBuilder will return new MemSessionBuilder
+// NewMemSessionBuilder will return new MemSessionBuilder
 func NewMemSessionBuilder(domain string, path string, cookie string, timeout time.Duration) *MemSessionBuilder {
 	sb := MemSessionBuilder{}
 	sb.Domain = domain
@@ -64,7 +64,7 @@ func (m *MemSessionBuilder) log(f string, args ...interface{}) {
 	}
 }
 
-//Find will find sesion by tokken
+// Find will find sesion by tokken
 func (m *MemSessionBuilder) Find(id string) (session Sessionable) {
 	m.locker.RLock()
 	defer m.locker.RUnlock()
@@ -74,7 +74,7 @@ func (m *MemSessionBuilder) Find(id string) (session Sessionable) {
 	return
 }
 
-//FindSession will find the session by request
+// FindSession will find the session by request
 func (m *MemSessionBuilder) FindSession(w http.ResponseWriter, r *http.Request) Sessionable {
 	c, err := r.Cookie(m.CookieKey)
 	ncookie := func() {
@@ -120,12 +120,12 @@ func (m *MemSessionBuilder) FindSession(w http.ResponseWriter, r *http.Request) 
 
 }
 
-//SetEventHandler will set event handler
+// SetEventHandler will set event handler
 func (m *MemSessionBuilder) SetEventHandler(h SessionEventHandler) {
 	m.Event = h
 }
 
-//StartTimeout will start timeout
+// StartTimeout will start timeout
 func (m *MemSessionBuilder) StartTimeout() {
 	if m.Timeout > 0 {
 		m.looping = true
@@ -133,12 +133,11 @@ func (m *MemSessionBuilder) StartTimeout() {
 	}
 }
 
-//StopTimeout will stop timeout
+// StopTimeout will stop timeout
 func (m *MemSessionBuilder) StopTimeout() {
 	m.looping = false
 }
 
-//
 func (m *MemSessionBuilder) loopTimeout() {
 	for m.looping {
 		ary := []string{}

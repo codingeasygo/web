@@ -6,7 +6,7 @@ import (
 	"github.com/codingeasygo/web"
 )
 
-//NoCacheF will set the not cache to reponse
+// NoCacheF will set the not cache to reponse
 func NoCacheF(hs *web.Session) web.Result {
 	hs.W.Header().Set("Expires", "Tue, 01 Jan 1980 1:00:00 GMT")
 	hs.W.Header().Set("Last-Modified", time.Now().UTC().Format("Mon, 02 Jan 2006 15:04:05 GMT"))

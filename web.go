@@ -16,7 +16,7 @@ import (
 	"github.com/codingeasygo/util/xmap"
 )
 
-//Result is http handler result
+// Result is http handler result
 type Result int
 
 const (
@@ -91,56 +91,56 @@ func (h Result) String() string {
 	return "RETURN"
 }
 
-//SessionEventFunc is SessionEventHandler implement
+// SessionEventFunc is SessionEventHandler implement
 type SessionEventFunc func(string, Sessionable)
 
-//OnCreate is event handler on session create
+// OnCreate is event handler on session create
 func (f SessionEventFunc) OnCreate(s Sessionable) {
 	f("CREATE", s)
 }
 
-//OnTimeout is event handler on session tiemout
+// OnTimeout is event handler on session tiemout
 func (f SessionEventFunc) OnTimeout(s Sessionable) {
 	f("TIMEOUT", s)
 }
 
-//SessionEventHandler is interface to session event handler
+// SessionEventHandler is interface to session event handler
 type SessionEventHandler interface {
 	OnCreate(s Sessionable)
 	OnTimeout(s Sessionable)
 }
 
-//SessionBuilder is interface to build the session
+// SessionBuilder is interface to build the session
 type SessionBuilder interface {
 	Find(id string) Sessionable
 	FindSession(w http.ResponseWriter, r *http.Request) Sessionable
 	SetEventHandler(h SessionEventHandler)
 }
 
-//Sessionable is interface to record session value
+// Sessionable is interface to record session value
 type Sessionable interface {
 	xmap.Valuable
 	ID() string
 	Flush() error
 }
 
-//Handler is interface to handler http request
+// Handler is interface to handler http request
 type Handler interface {
 	SrvHTTP(*Session) Result
 }
 
-//HandlerFunc is func implment Handler
+// HandlerFunc is func implment Handler
 type HandlerFunc func(*Session) Result
 
-//SrvHTTP implement Handler
+// SrvHTTP implement Handler
 func (h HandlerFunc) SrvHTTP(s *Session) Result {
 	return h(s)
 }
 
-//NormalHandlerFunc is normal http handler
+// NormalHandlerFunc is normal http handler
 type NormalHandlerFunc func(w http.ResponseWriter, r *http.Request)
 
-//SrvHTTP implement Handler
+// SrvHTTP implement Handler
 func (n NormalHandlerFunc) SrvHTTP(s *Session) Result {
 	n(s.W, s.R)
 	return -1
@@ -151,7 +151,7 @@ func (n NormalHandlerFunc) SrvHTTP(s *Session) Result {
 // 	LocalVal(session *Session, key string) string
 // }
 
-//Session is http session implement
+// Session is http session implement
 type Session struct {
 	Sessionable
 	W   http.ResponseWriter
@@ -161,7 +161,7 @@ type Session struct {
 	// V interface{} //response value.
 }
 
-//SetCookie will set cookie by key/value
+// SetCookie will set cookie by key/value
 func (s *Session) SetCookie(key string, val string) {
 	cookie := &http.Cookie{}
 	cookie.Name = key
@@ -175,7 +175,7 @@ func (s *Session) SetCookie(key string, val string) {
 	http.SetCookie(s.W, cookie)
 }
 
-//Cookie will return cookie value by key
+// Cookie will return cookie value by key
 func (s *Session) Cookie(key string) (val string) {
 	c, err := s.R.Cookie(key)
 	if err == nil && c != nil {
@@ -184,13 +184,13 @@ func (s *Session) Cookie(key string) (val string) {
 	return
 }
 
-//Redirect will send redirect to url
+// Redirect will send redirect to url
 func (s *Session) Redirect(url string) Result {
 	http.Redirect(s.W, s.R, url, http.StatusTemporaryRedirect)
 	return Return
 }
 
-//Argument will get argument by key from form or post form
+// Argument will get argument by key from form or post form
 func (s *Session) Argument(key string) (sval string) {
 	if len(s.R.Form) < 1 && len(s.R.PostForm) < 1 {
 		s.R.ParseForm()
@@ -202,7 +202,7 @@ func (s *Session) Argument(key string) (sval string) {
 	return
 }
 
-//Get is implement for attrvalid
+// Get is implement for attrvalid
 func (s *Session) Get(key string) (val interface{}, err error) {
 	if len(s.R.Form) < 1 && len(s.R.PostForm) < 1 {
 		err = s.R.ParseForm()
@@ -215,7 +215,7 @@ func (s *Session) Get(key string) (val interface{}, err error) {
 	return
 }
 
-//ValidFormat is implement for attrvalid
+// ValidFormat is implement for attrvalid
 func (s *Session) ValidFormat(format string, args ...interface{}) (err error) {
 	err = attrvalid.ValidAttrFormat(format, s, true, args...)
 	return
@@ -230,14 +230,14 @@ var Valider = attrvalid.Valider{
 	},
 }
 
-//Valid is implement for valid object and argument
+// Valid is implement for valid object and argument
 func (s *Session) Valid(target interface{}, filter string, args ...interface{}) (err error) {
 	format, args := Valider.ValidArgs(target, filter, args...)
 	err = s.ValidFormat(format, args...)
 	return
 }
 
-//LocalValue will return local value.
+// LocalValue will return local value.
 func (s *Session) LocalValue(key string) string {
 	return key
 }
@@ -297,7 +297,7 @@ func (s *Session) LocalValue(key string) string {
 // 	}
 // }
 
-//Host will return request host
+// Host will return request host
 func (s *Session) Host() string {
 	return s.R.Host
 }
@@ -341,7 +341,7 @@ func (s *Session) Host() string {
 
 // /* --------------- Access-Language --------------- */
 
-//SessionMux session mux implement
+// SessionMux session mux implement
 type SessionMux struct {
 	xmap.Valuable
 	Pre     string
@@ -370,12 +370,12 @@ type SessionMux struct {
 	M        *monitor.Monitor
 }
 
-//NewSessionMux will return new SessionMux
+// NewSessionMux will return new SessionMux
 func NewSessionMux(pre string) *SessionMux {
 	return NewBuilderSessionMux(pre, NewDefaultSessionBuilder())
 }
 
-//NewBuilderSessionMux will create new SessionMux by session builder
+// NewBuilderSessionMux will create new SessionMux by session builder
 func NewBuilderSessionMux(pre string, sb SessionBuilder) *SessionMux {
 	mux := SessionMux{}
 	mux.Pre = pre
@@ -407,19 +407,19 @@ func NewBuilderSessionMux(pre string, sb SessionBuilder) *SessionMux {
 // 	s.compressRouter[reg] = 1
 // }
 
-//RequestSession will return sesion by request
+// RequestSession will return sesion by request
 func (s *SessionMux) RequestSession(r *http.Request) *Session {
 	s.locker.RLock()
 	defer s.locker.RUnlock()
 	return s.sessions[r]
 }
 
-//Filter will register filter
+// Filter will register filter
 func (s *SessionMux) Filter(pattern string, h Handler) {
 	s.FilterMethod(pattern, h, "*")
 }
 
-//FilterMethod will register filter
+// FilterMethod will register filter
 func (s *SessionMux) FilterMethod(pattern string, h Handler, m string) {
 	reg := regexp.MustCompile(pattern)
 	s.Filters[reg] = h
@@ -428,22 +428,22 @@ func (s *SessionMux) FilterMethod(pattern string, h Handler, m string) {
 	s.regexMethodM[reg] = m
 }
 
-//FilterFunc will register filter by func
+// FilterFunc will register filter by func
 func (s *SessionMux) FilterFunc(pattern string, h HandlerFunc) {
 	s.Filter(pattern, h)
 }
 
-//FilterMethodFunc will register filter by func
+// FilterMethodFunc will register filter by func
 func (s *SessionMux) FilterMethodFunc(pattern string, h HandlerFunc, m string) {
 	s.FilterMethod(pattern, h, m)
 }
 
-//Handle will register handler
+// Handle will register handler
 func (s *SessionMux) Handle(pattern string, h Handler) {
 	s.HandleMethod(pattern, h, "*")
 }
 
-//HandleMethod will register handler
+// HandleMethod will register handler
 func (s *SessionMux) HandleMethod(pattern string, h Handler, m string) {
 	reg := regexp.MustCompile(pattern)
 	s.Handlers[reg] = h
@@ -452,22 +452,22 @@ func (s *SessionMux) HandleMethod(pattern string, h Handler, m string) {
 	s.regexMethodM[reg] = m
 }
 
-//HandleFunc will register func as handler
+// HandleFunc will register func as handler
 func (s *SessionMux) HandleFunc(pattern string, h HandlerFunc) {
 	s.Handle(pattern, h)
 }
 
-//HandleMethodFunc will register func as handler
+// HandleMethodFunc will register func as handler
 func (s *SessionMux) HandleMethodFunc(pattern string, h HandlerFunc, method string) {
 	s.HandleMethod(pattern, h, method)
 }
 
-//HandleNormal will register normal handler as handler
+// HandleNormal will register normal handler as handler
 func (s *SessionMux) HandleNormal(pattern string, h http.Handler) {
 	s.HandleNormalMethod(pattern, h, "*")
 }
 
-//HandleNormalMethod will register normal handler as handler
+// HandleNormalMethod will register normal handler as handler
 func (s *SessionMux) HandleNormalMethod(pattern string, h http.Handler, method string) {
 	reg := regexp.MustCompile(pattern)
 	s.Handlers[reg] = NormalHandlerFunc(h.ServeHTTP)
@@ -481,12 +481,12 @@ func (s *SessionMux) HandleNormalMethod(pattern string, h http.Handler, method s
 	s.regexMethodM[reg] = method
 }
 
-//HandleNormalFunc will register normal func as handler
+// HandleNormalFunc will register normal func as handler
 func (s *SessionMux) HandleNormalFunc(pattern string, h http.HandlerFunc) {
 	s.HandleNormal(pattern, h)
 }
 
-//HandleMethodNormalFunc will register normal func as handler, m is http method, * is for all method
+// HandleMethodNormalFunc will register normal func as handler, m is http method, * is for all method
 func (s *SessionMux) HandleMethodNormalFunc(pattern string, h http.HandlerFunc, method string) {
 	s.HandleNormalMethod(pattern, h, method)
 }
@@ -598,7 +598,6 @@ func (s *SessionMux) execHandler(hs *Session) (bool, Result) {
 // 	return false
 // }
 
-//
 func (s *SessionMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.slog("receive %v request by %v", r.Method, r.URL)
 	beg := time.Now()
@@ -672,7 +671,7 @@ func (s *SessionMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Print will show all current handler info
+// Print will show all current handler info
 func (s *SessionMux) Print() {
 	if len(s.Filters) > 0 {
 		fmt.Println(" >Filters---->")
@@ -688,12 +687,12 @@ func (s *SessionMux) Print() {
 	}
 }
 
-//StartMonitor will start monitor
+// StartMonitor will start monitor
 func (s *SessionMux) StartMonitor() {
 	s.M = monitor.New()
 }
 
-//State for implement Statable for get current state
+// State for implement Statable for get current state
 func (s *SessionMux) State() (state interface{}, err error) {
 	if s.M != nil {
 		state, err = s.M.State()

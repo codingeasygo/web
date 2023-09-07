@@ -13,7 +13,7 @@ import (
 	"github.com/codingeasygo/web"
 )
 
-//Server is httptest server
+// Server is httptest server
 type Server struct {
 	*xhttp.Client
 	URL string
@@ -22,7 +22,7 @@ type Server struct {
 	Mux *web.SessionMux
 }
 
-//NewServer will return session mux httptest server
+// NewServer will return session mux httptest server
 func NewServer(mux *web.SessionMux) *Server {
 	srv := &Server{Mux: mux}
 	srv.S = httptest.NewServer(mux)
@@ -31,26 +31,26 @@ func NewServer(mux *web.SessionMux) *Server {
 	return srv
 }
 
-//NewMuxServer will return httptest server
+// NewMuxServer will return httptest server
 func NewMuxServer() *Server {
 	sb := web.NewMemSessionBuilder("", "/", "httptest", 60*time.Second)
 	mux := web.NewBuilderSessionMux("", sb)
 	return NewServer(mux)
 }
 
-//NewHandlerServer will return httptest server for web.Handler
+// NewHandlerServer will return httptest server for web.Handler
 func NewHandlerServer(f web.Handler) *Server {
 	srv := NewMuxServer()
 	srv.Mux.Handle("^.*$", f)
 	return srv
 }
 
-//NewHandlerFuncServer will return httptest server for web.HandlerFunc
+// NewHandlerFuncServer will return httptest server for web.HandlerFunc
 func NewHandlerFuncServer(f web.HandlerFunc) *Server {
 	return NewHandlerServer(f)
 }
 
-//Close will close the httptest server
+// Close will close the httptest server
 func (s *Server) Close() {
 	s.S.Close()
 	if s.TLS != nil {
@@ -58,7 +58,7 @@ func (s *Server) Close() {
 	}
 }
 
-//StartTLS will enable tls
+// StartTLS will enable tls
 func (s *Server) StartTLS() {
 	s.TLS = httptest.NewTLSServer(s.Mux)
 	s.URL = s.TLS.URL

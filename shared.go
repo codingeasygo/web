@@ -11,36 +11,36 @@ import (
 	"time"
 )
 
-//Shared is the shared session mux
+// Shared is the shared session mux
 var Shared = NewSessionMux("")
 
-//Filter will register the handler to shared
+// Filter will register the handler to shared
 func Filter(pattern string, h Handler) {
 	Shared.Filter(pattern, h)
 }
 
-//FilterFunc will register the handler to shared
+// FilterFunc will register the handler to shared
 func FilterFunc(pattern string, h HandlerFunc) {
 	Filter(pattern, h)
 }
 
-//Handle will register the handler to shared
+// Handle will register the handler to shared
 func Handle(pattern string, h Handler) {
 	Shared.Handle(pattern, h)
 }
 
-//HandleFunc will register the handler to shared
+// HandleFunc will register the handler to shared
 func HandleFunc(pattern string, h HandlerFunc) {
 	Handle(pattern, h)
 }
 
-//Server is shared http server
+// Server is shared http server
 var Server *http.Server
 
-//Listener is shared listener
+// Listener is shared listener
 var Listener net.Listener
 
-//ListenAndServe will listen the shared server
+// ListenAndServe will listen the shared server
 func ListenAndServe(addr string) (err error) {
 	Server = &http.Server{Handler: Shared}
 	if strings.HasPrefix(addr, "/") {
@@ -85,7 +85,7 @@ func (ln tcpKeepAliveListener) Accept() (net.Conn, error) {
 
 var sigc chan os.Signal
 
-//HandleSignal will handle the kill signal and stop the server
+// HandleSignal will handle the kill signal and stop the server
 func HandleSignal() error {
 	sigc = make(chan os.Signal, 1)
 	signal.Notify(sigc,

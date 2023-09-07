@@ -18,38 +18,38 @@ import (
 	"github.com/codingeasygo/web"
 )
 
-var regExternLine = regexp.MustCompile("^<!--[\\s]*R:.*-->$")
+var regExternLine = regexp.MustCompile(`^<!--[\s]*R:.*-->$`)
 
-//RenderHandler is render handler
+// RenderHandler is render handler
 type RenderHandler interface {
 	LoadData(r *Render, hs *web.Session) (tmpl *Template, data interface{}, err error)
 }
 
-//RenderDataHandler is render data handler
+// RenderDataHandler is render data handler
 type RenderDataHandler interface {
 	LoadData(r *Render, hs *web.Session, tmpl *Template, args url.Values, info interface{}) (data interface{}, err error)
 }
 
-//RenderDataHandlerFunc is reander data handler by func
+// RenderDataHandlerFunc is reander data handler by func
 type RenderDataHandlerFunc func(r *Render, hs *web.Session, tmpl *Template, args url.Values, info interface{}) (data interface{}, err error)
 
-//LoadData is implement RenderDataHandler
+// LoadData is implement RenderDataHandler
 func (f RenderDataHandlerFunc) LoadData(r *Render, hs *web.Session, tmpl *Template, args url.Values, info interface{}) (data interface{}, err error) {
 	return f(r, hs, tmpl, args, info)
 }
 
-//RenderWebData is render data handler by upstream url
+// RenderWebData is render data handler by upstream url
 type RenderWebData struct {
 	Upstream string //the upstream uri
 	Path     string //the path of reponsed map value
 }
 
-//NewRenderWebData will create render data by upstream url
+// NewRenderWebData will create render data by upstream url
 func NewRenderWebData(upstream string) *RenderWebData {
 	return &RenderWebData{Upstream: upstream}
 }
 
-//LoadData will load data from web url
+// LoadData will load data from web url
 func (r *RenderWebData) LoadData(render *Render, hs *web.Session, tmpl *Template, args url.Values, info interface{}) (data interface{}, err error) {
 	var url string
 	if strings.Contains(r.Upstream, "?") {
@@ -71,29 +71,29 @@ func (r *RenderWebData) LoadData(render *Render, hs *web.Session, tmpl *Template
 	return data, err
 }
 
-//RenderDataNamedHandler is named reader data handler
+// RenderDataNamedHandler is named reader data handler
 type RenderDataNamedHandler struct {
 	handler map[string]RenderDataHandler
 }
 
-//NewRenderDataNamedHandler will return new RenderDataNamedHandler
+// NewRenderDataNamedHandler will return new RenderDataNamedHandler
 func NewRenderDataNamedHandler() *RenderDataNamedHandler {
 	return &RenderDataNamedHandler{
 		handler: map[string]RenderDataHandler{},
 	}
 }
 
-//AddFunc will register func handler
+// AddFunc will register func handler
 func (r *RenderDataNamedHandler) AddFunc(key string, f RenderDataHandlerFunc) {
 	r.handler[key] = f
 }
 
-//AddHandler will register handler
+// AddHandler will register handler
 func (r *RenderDataNamedHandler) AddHandler(key string, h RenderDataHandler) {
 	r.handler[key] = h
 }
 
-//LoadData is implement Handler
+// LoadData is implement Handler
 func (r *RenderDataNamedHandler) LoadData(reander *Render, hs *web.Session) (tmpl *Template, data interface{}, err error) {
 	var args url.Values
 	tmpl, args, err = reander.LoadSession(hs)
@@ -112,7 +112,7 @@ func (r *RenderDataNamedHandler) LoadData(reander *Render, hs *web.Session) (tmp
 	return
 }
 
-//Template is reander template
+// Template is reander template
 type Template struct {
 	Path     string             `json:"path"`
 	Text     string             `json:"text"`
@@ -121,7 +121,7 @@ type Template struct {
 	Template *template.Template `json:"-"`
 }
 
-//Render is http web page render on server
+// Render is http web page render on server
 type Render struct {
 	Dir       string
 	Handler   RenderHandler
@@ -133,7 +133,7 @@ type Render struct {
 	cacheLck  sync.RWMutex
 }
 
-//NewRender will create reander by handler
+// NewRender will create reander by handler
 func NewRender(dir string, h RenderHandler) *Render {
 	return &Render{
 		Dir:      dir,
@@ -145,7 +145,7 @@ func NewRender(dir string, h RenderHandler) *Render {
 	}
 }
 
-//LoadTemplate will create load template from path
+// LoadTemplate will create load template from path
 func (r *Render) LoadTemplate(path string) (tmpl *Template, err error) {
 	tmpl = &Template{}
 	tmpl.Path = path
@@ -178,7 +178,7 @@ func (r *Render) LoadTemplate(path string) (tmpl *Template, err error) {
 	return
 }
 
-//LoadSession will load template by http session.
+// LoadSession will load template by http session.
 func (r *Render) LoadSession(hs *web.Session) (*Template, url.Values, error) {
 	path := strings.TrimSpace(hs.R.URL.Path)
 	path = strings.Trim(path, "/ \t")
@@ -198,7 +198,7 @@ func (r *Render) LoadSession(hs *web.Session) (*Template, url.Values, error) {
 	return tmpl, targs, nil
 }
 
-//SrvHTTP is implement for web.Handler
+// SrvHTTP is implement for web.Handler
 func (r *Render) SrvHTTP(hs *web.Session) web.Result {
 	web.DebugLog("Render doing %v", hs.R.URL.Path)
 	if hs.R.URL.Query().Get("_data_") == "1" {

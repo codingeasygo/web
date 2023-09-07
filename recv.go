@@ -17,7 +17,7 @@ import (
 	"github.com/codingeasygo/util/xio"
 )
 
-//MultipartFile is recevied file result
+// MultipartFile is recevied file result
 type MultipartFile struct {
 	Name     string
 	Filename string
@@ -27,13 +27,13 @@ type MultipartFile struct {
 	MD5      []byte
 }
 
-//MultipartValues is recevied result
+// MultipartValues is recevied result
 type MultipartValues struct {
 	Files  []*MultipartFile
 	Values map[string][][]byte
 }
 
-//RecvMultipart will recv http body as multi part
+// RecvMultipart will recv http body as multi part
 func (s *Session) RecvMultipart(enableSHA1, enableMD5 bool, savePathFunc func(*multipart.Part) (filename string, mode os.FileMode, external []io.Writer, err error)) (*MultipartValues, error) {
 	mr, err := s.R.MultipartReader()
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *Session) RecvMultipart(enableSHA1, enableMD5 bool, savePathFunc func(*m
 	return vals, nil
 }
 
-//RecvFile will receive form file and save to filename
+// RecvFile will receive form file and save to filename
 func (s *Session) RecvFile(enableSHA1, enableMD5 bool, name, filename string) (*MultipartValues, error) {
 	vals, err := s.RecvMultipart(enableSHA1, enableMD5, func(part *multipart.Part) (fn string, mode os.FileMode, external []io.Writer, err error) {
 		fn = filename
@@ -124,7 +124,7 @@ func (s *Session) RecvFile(enableSHA1, enableMD5 bool, name, filename string) (*
 	return vals, err
 }
 
-//RecvFileBytes will receive body to bytes
+// RecvFileBytes will receive body to bytes
 func (s *Session) RecvFileBytes(name string, maxMemory int64) (data []byte, err error) {
 	// err = s.R.ParseMultipartForm(maxMemory)
 	// if err != nil {
@@ -144,25 +144,25 @@ func (s *Session) RecvFileBytes(name string, maxMemory int64) (data []byte, err 
 	return
 }
 
-//RecvBody will receive body and parse to json object
+// RecvBody will receive body and parse to json object
 func (s *Session) RecvBody() (data []byte, err error) {
 	data, err = ioutil.ReadAll(s.R.Body)
 	return
 }
 
-//RecvJSON will receive body and parse to json object
+// RecvJSON will receive body and parse to json object
 func (s *Session) RecvJSON(v interface{}) (data []byte, err error) {
 	data, err = converter.UnmarshalJSON(s.R.Body, v)
 	return
 }
 
-//RecvXML will receive body and parse to xml object
+// RecvXML will receive body and parse to xml object
 func (s *Session) RecvXML(v interface{}) (data []byte, err error) {
 	data, err = converter.UnmarshalXML(s.R.Body, v)
 	return
 }
 
-//RecvValidJSON will receive body, then parse to json object and valid object
+// RecvValidJSON will receive body, then parse to json object and valid object
 func (s *Session) RecvValidJSON(v interface{}, filter, optional string) (data []byte, err error) {
 	data, err = converter.UnmarshalJSON(s.R.Body, v)
 	if err == nil {
@@ -171,7 +171,7 @@ func (s *Session) RecvValidJSON(v interface{}, filter, optional string) (data []
 	return
 }
 
-//RecvValideXML will receive body, then parse to xml object and valid object
+// RecvValideXML will receive body, then parse to xml object and valid object
 func (s *Session) RecvValideXML(v interface{}, filter, optional string) (data []byte, err error) {
 	data, err = converter.UnmarshalXML(s.R.Body, v)
 	if err == nil {
@@ -204,7 +204,7 @@ func formFileSzie(src interface{}) int64 {
 	return fsize
 }
 
-//FormFileInfo will return form file info
+// FormFileInfo will return form file info
 func (s *Session) FormFileInfo(name string) (filesize int64, filename string, err error) {
 	src, fh, err := s.R.FormFile(name)
 	if err == nil {
