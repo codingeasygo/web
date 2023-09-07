@@ -86,7 +86,7 @@ func (ln tcpKeepAliveListener) Accept() (net.Conn, error) {
 var sigc chan os.Signal
 
 // HandleSignal will handle the kill signal and stop the server
-func HandleSignal() error {
+func HandleSignal() (err error) {
 	sigc = make(chan os.Signal, 1)
 	signal.Notify(sigc,
 		syscall.SIGHUP,
@@ -94,5 +94,8 @@ func HandleSignal() error {
 		syscall.SIGTERM,
 		syscall.SIGQUIT)
 	<-sigc
-	return Listener.Close()
+	if Listener != nil {
+		err = Listener.Close()
+	}
+	return
 }
